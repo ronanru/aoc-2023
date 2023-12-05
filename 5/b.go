@@ -7,7 +7,10 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 )
+
+var res int = math.MaxInt64
 
 type Translation struct {
 	to     int
@@ -15,27 +18,23 @@ type Translation struct {
 	length int
 }
 
-func applyTranslations(num int, translations [][]Translation, ch chan int) {
-	for _, translation := range translations {
-		num = applyTranslation(num, translation)
-	}
-	ch <- num
-}
-
-func applyTranslation(num int, translations []Translation) int {
-	for _, translation := range translations {
-		if num >= translation.from && num <= translation.from+translation.length {
-			num = translation.to + (num - translation.from)
-			break
+func applyTranslations(num int, steps [][]Translation, wg *sync.WaitGroup) {
+	for _, translations := range steps {
+		for _, translation := range translations {
+			if num >= translation.from && num <= translation.from+translation.length {
+				num = translation.to + (num - translation.from)
+				break
+			}
 		}
 	}
-	return num
+	if num < res {
+		res = num
+	}
+	wg.Done()
 }
 
 func main() {
 	file, _ := os.ReadFile("input.txt")
-
-	res := math.MaxInt32
 
 	seedsPart, mapPart, _ := strings.Cut(string(file), "\n\n")
 	seeds := slices.Delete(strings.Split(seedsPart, " "), 0, 1)
@@ -54,21 +53,18 @@ func main() {
 		}
 	}
 
-	ch := make(chan int)
+	var wg sync.WaitGroup
 
 	for len(seeds) > 0 {
 		from, _ := strconv.Atoi(seeds[0])
 		length, _ := strconv.Atoi(seeds[1])
 		for i := from; i < from+length; i++ {
-			go applyTranslations(i, translationSteps, ch)
-			num := <-ch
-			// fmt.Println(i, num)
-			if num < res {
-				res = num
-			}
+			wg.Add(1)
+			go applyTranslations(i, translationSteps, &wg)
 		}
 		seeds = slices.Delete(seeds, 0, 2)
 	}
+	wg.Wait()
 
 	fmt.Println(res)
 }
