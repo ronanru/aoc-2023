@@ -1,5 +1,7 @@
 */input.txt
 */test.txt
+!template/input.txt
+!template/test.txt
 node_modules
 
 
