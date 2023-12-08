@@ -5,4 +5,4 @@ let res = 0;
 
 const lines = input.split("\n").map((d) => parseInt(d));
 
-console.log(lines);
+console.log(res);
