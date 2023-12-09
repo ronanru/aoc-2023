@@ -1,5 +1,5 @@
-// const input = await Bun.file("test.txt").text();
-const input = await Bun.file("input.txt").text();
+const input = await Bun.file("test.txt").text();
+// const input = await Bun.file("input.txt").text();
 
 let res = 0;
 

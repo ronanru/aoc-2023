@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	file, _ := os.ReadFile("input.txt")
+	file, _ := os.ReadFile("test.txt")
 
 	res := 0
 
