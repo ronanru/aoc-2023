@@ -1,10 +1,9 @@
 */input.txt
 */test.txt
+*/a
+*/b
 !template/input.txt
 !template/test.txt
 node_modules
-
-
-# Added by cargo
-
 /target
+.benchCache.json
