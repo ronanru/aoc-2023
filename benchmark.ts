@@ -1,4 +1,6 @@
 import fs from "fs";
+import chalk from "chalk";
+import { table } from "table";
 
 const days = fs
   .readdirSync(".")
@@ -6,11 +8,13 @@ const days = fs
   .filter((d) => !isNaN(d))
   .sort((a, b) => a - b);
 
+type BenchResult = number | undefined;
+
 type Cache = Record<
   number,
   {
-    go: [number, number];
-    ts: [number, number];
+    go: [BenchResult, BenchResult];
+    ts: [BenchResult, BenchResult];
   }
 >;
 
@@ -33,29 +37,47 @@ const exec = (command: string[], day?: number) => {
   return performance.now() - time;
 };
 
-const formatMs = (ms: number) => `${ms.toFixed(2).padStart(6, " ")}ms`;
+const runTS = (day: number, part: string) =>
+  exec(["bun", "run", `${part}.ts`], day);
+
+const runGo = (day: number, part: string) => {
+  exec(["go", "build", `${part}.go`], day);
+  return exec([`${import.meta.dir}/${day}/${part}`], day);
+};
+
+const formatMs = (ms = 0) =>
+  chalk[ms > 15 ? (ms > 30 ? "red" : "yellow") : "green"](
+    `${ms.toFixed(2).padStart(10, " ")}ms`
+  );
 
 for (const day of days) {
-  process.stdout.write(`Day ${day}: Go `);
-  if (!cache[day]) cache[day] = { go: [-1, -1], ts: [-1, -1] };
-  if (cache[day].go[0] === -1) {
-    exec(["go", "build", "a.go"], day);
-    cache[day].go[0] = exec([`${import.meta.dir}/${day}/a`], day);
-  }
-  process.stdout.write(`${formatMs(cache[day].go[0])} `);
-  if (cache[day].go[1] === -1) {
-    exec(["go", "build", "b.go"], day);
-    cache[day].go[1] = exec([`${import.meta.dir}/${day}/b`], day);
-  }
-  process.stdout.write(`${formatMs(cache[day].go[1])}, TS `);
-  if (cache[day].ts[0] === -1) {
-    cache[day].ts[0] = exec(["bun", "run", "a.ts"], day);
-  }
-  process.stdout.write(`${formatMs(cache[day].ts[0])} `);
-  if (cache[day].ts[1] === -1) {
-    cache[day].ts[1] = exec(["bun", "run", "b.ts"], day);
-  }
-  process.stdout.write(`${formatMs(cache[day].ts[1])}\n`);
+  if (!cache[day])
+    cache[day] = { go: [undefined, undefined], ts: [undefined, undefined] };
+  cache[day].go[0] ??= runGo(day, "a");
+  cache[day].go[1] ??= runGo(day, "b");
+  cache[day].ts[0] ??= runTS(day, "a");
+  cache[day].ts[1] ??= runTS(day, "b");
 }
+
+console.log(
+  table(
+    [
+      ["D\na\ny", chalk.blueBright(" Go"), "", chalk.blue("󰛦 TypeScript"), ""],
+      ["", "Part 1", "Part 2", "Part 1", "Part 2"],
+      ...Object.entries(cache).map(([day, { go, ts }]) => [
+        day,
+        ...go.map(formatMs),
+        ...ts.map(formatMs),
+      ]),
+    ],
+    {
+      spanningCells: [
+        { row: 0, col: 0, rowSpan: 2 },
+        { row: 0, col: 1, colSpan: 2, alignment: "center" },
+        { row: 0, col: 3, colSpan: 2, alignment: "center" },
+      ],
+    }
+  )
+);
 
 Bun.write(".benchCache.json", JSON.stringify(cache, null, 2));
