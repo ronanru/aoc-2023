@@ -6,8 +6,17 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+pathfinding = "4.6.0"
 rayon = "1.8.0"
 
 [[bin]]
 name = "day_5_part_2"
 path = "5/b.rs"
+
+[[bin]]
+name = "day_17_part_1"
+path = "17/a.rs"
+
+[[bin]]
+name = "day_17_part_2"
+path = "17/b.rs"
