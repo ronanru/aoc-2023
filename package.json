@@ -3,13 +3,15 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "tsx": "^4.7.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
     "chalk": "^5.3.0",
-    "table": "^6.8.1"
+    "table": "^6.8.1",
+    "z3-solver": "^4.12.4"
   }
 }
