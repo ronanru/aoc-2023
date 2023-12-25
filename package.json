@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "chalk": "^5.3.0",
+    "graphology": "^0.25.4",
+    "graphology-components": "^1.5.4",
     "table": "^6.8.1",
     "z3-solver": "^4.12.4"
   }
